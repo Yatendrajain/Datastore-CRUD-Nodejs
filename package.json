@@ -1,16 +1,20 @@
 {
-  "name": "freshworks-engineering-assignment",
-  "version": "1.0.0",
-  "description": "A File based key value pair which performs basic CRD Operations",
-  "main": "datastore.js",
-  "scripts": {
-    "test": "node datastore.js"
-  },
-  "keywords": [
-    "Datastore",
-    "Local",
-    "Storage"
-  ],
-  "author": "Yatendra Jain (MNM Jain Engineering College)",
-  "license": "ISC"
+    "name": "freshworks-engineering-assignment",
+    "version": "1.0.0",
+    "description": "A File based key value pair which performs basic CRD Operations",
+    "main": "datastore.js",
+    "type": "module",
+    "scripts": {
+        "test": "node datastore.js"
+    },
+    "keywords": [
+        "Datastore",
+        "Local",
+        "Storage"
+    ],
+    "author": "Yatendra Jain (MNM Jain Engineering College)",
+    "license": "ISC",
+    "dependencies": {
+        "node-localstorage": "^2.1.6"
+    }
 }
