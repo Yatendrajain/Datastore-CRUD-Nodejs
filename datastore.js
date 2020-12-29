@@ -3,11 +3,12 @@
 // Data store is meant to local storage for one single process on single laptop.
 
 //Import Statements
-import { localStorage } from "node-localstorage";
+var LocalStorage = require("node-localstorage").LocalStorage;
+localStorage = new LocalStorage("./scratch");
 
 //Class DataStore
 
-export class dataStore {
+var dataStore = class dataStore {
     //Create Method
     /**
      * Create Key-Value Pair In Local Storage.
@@ -39,4 +40,6 @@ export class dataStore {
         localStorage.removeItem(key);
         console.log("Success");
     }
-}
+};
+
+module.exports = dataStore;
