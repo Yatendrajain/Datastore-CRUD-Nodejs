@@ -26,7 +26,13 @@ var dataStore = class dataStore {
      */
     create(key, value, time_to_live = 0) {
         //Variable Declaration
-        this.valueobj = { value: value, time_to_live: time_to_live }; //Updating Json Object to append
+        this.key = key;
+        this.value = value;
+        this.time_to_live = time_to_live;
+
+        var millis = Date.now();
+        this.time_to_live = Math.floor(millis / 1000) + this.time_to_live;
+        this.valueobj = { value: this.value, time_to_live: this.time_to_live }; //Updating Json Object to append
         var size = Buffer.byteLength(JSON.stringify(this.valueobj)); //Calculating the size of json object
         var sizeInKB = size / 1024; //Calculating the size in KB
 
@@ -41,12 +47,12 @@ var dataStore = class dataStore {
             localStorage.setItem(key, JSON.stringify(this.valueobj));
             console.log(
                 "Success! Key: " +
-                key +
+                this.key +
                 ", value: " +
-                value +
+                this.value +
                 " is added" +
                 "\nTime to live: " +
-                time_to_live,
+                this.time_to_live,
             );
         }
     }
@@ -57,8 +63,20 @@ var dataStore = class dataStore {
      * @param {string} key - To read key-value pair of specific key
      */
     read(key) {
-        this.value = localStorage.getItem(key);
-        return this.value;
+        if (JSON.parse(localStorage.getItem(key)) == null) {
+            console.log("Key Doesn't Exist in local Storage");
+        } else {
+            var millis = Date.now();
+            var currentTime = Math.floor(millis / 1000);
+            this.valueobj = JSON.parse(localStorage.getItem(key));
+            var time = this.valueobj.time_to_live;
+            if (currentTime > time) {
+                return "Time Expired to read the data";
+            } else {
+                this.valueobj = localStorage.getItem(key);
+                return this.valueobj;
+            }
+        }
     }
 
     //Delete Method
@@ -71,11 +89,19 @@ var dataStore = class dataStore {
         if (localStorage.getItem(key) == null) {
             console.log("Key doesn't exist in local storage");
         } else {
-            var deleted_value = localStorage.getItem(key);
-            localStorage.removeItem(key);
-            console.log(
-                "Success! Key: " + key + ", value: " + deleted_value + " is deleted",
-            );
+            var millis = Date.now();
+            var currentTime = Math.floor(millis / 1000);
+            this.valueobj = JSON.parse(localStorage.getItem(key));
+            var time = this.valueobj.time_to_live;
+            if (currentTime > time) {
+                return "Time Expired to delete the data";
+            } else {
+                var deleted_value = localStorage.getItem(key);
+                localStorage.removeItem(key);
+                console.log(
+                    "Success! Key: " + key + ", value: " + deleted_value + " is deleted",
+                );
+            }
         }
     }
 };
