@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "Yatendra": {
+      "Salary": 15000,
+      "time_to_live": 1609346250
+    }
+  },
+  {
+    "Pratik": {
+      "value": 1000,
+      "time_to_live": 60
+    }
+  }
+]
