@@ -1,6 +1,8 @@
 // Library Description:
-// This is a file which can be exposed as a library that supports the basic CRD(create, read, write) operations.
-// Data store is meant to local storage for one single process on single laptop.
+/**
+ * This is a file which can be exposed as a library that supports the basic CRD(create, read, write) operations.
+ * Data store is meant to local storage for one single process on single laptop.
+ */
 
 //Import Statements
 const fs = require("fs");
@@ -32,7 +34,7 @@ var dataStore = class dataStore {
             if (err) {
                 console.log("An err occured" + err);
             } else {
-                console.log("file is made");
+                console.log("Storage is created");
             }
         });
     }
@@ -47,7 +49,7 @@ var dataStore = class dataStore {
         return jsonobj;
     }
 
-    //Create Method
+    //checkJSON Method
     /**
      * Returns true if the required JSON Object is in the array. else returns false.
      * @param {string} key - To check whether the key exists or not
@@ -63,6 +65,11 @@ var dataStore = class dataStore {
         return flag;
     }
 
+    //getItem Method
+    /**
+     * Returns the specific JSON Object for a key
+     * @param {string} key - To check the required JSON object in the array of JSON
+     */
     getItem(key) {
         var jsonobj = this.getJSON();
         var obj = {};
@@ -75,6 +82,13 @@ var dataStore = class dataStore {
         return obj;
     }
 
+    //setItem Method
+    /**
+     * Pushes the key value pair with the time to live property into the file
+     * @param {string} key - To set a key for some value
+     * @param {any} value - To set a value for a specific key
+     * @param {int} time_to_live - Maximum time to read or delete the key-value pair. Default = 0
+     */
     setItem(key, value, time_to_live) {
         let jsonobj = this.getJSON();
 
@@ -85,9 +99,13 @@ var dataStore = class dataStore {
         jsonobj.push(obj);
         let data = JSON.stringify(jsonobj, null, 2);
         fs.writeFileSync(this.path, data);
-        console.log("Data Successfully Written");
     }
 
+    //removeItem Method
+    /**
+     * Removes the JSON Object in the file
+     * @param {string} key - To remove the JSON object from the file.
+     */
     removeItem(key) {
         var jsonobj = this.getJSON();
         var obj = [];
@@ -102,6 +120,11 @@ var dataStore = class dataStore {
         return obj;
     }
 
+    //checkTime Method
+    /**
+     * Returns true if the Current time is less than the time to live property. else returns false
+     * @param {string} key - To check the time to live property for given key
+     */
     checkTime(key) {
         var millis = Date.now();
         var currentTime = Math.floor(millis / 1000);
@@ -130,33 +153,46 @@ var dataStore = class dataStore {
         //Calculating Time
         var millis = Date.now();
         this.time_to_live = Math.floor(millis / 1000) + this.time_to_live;
-        this.valueobj = { value: this.value, time_to_live: this.time_to_live }; //Updating Json Object to append
+        this.valueobj = { value: this.value, time_to_live: this.time_to_live }; //Creating Value JSON Object to append
 
-        //Size of value Object
+        //Size of value JSON Object
         var size = Buffer.byteLength(JSON.stringify(this.valueobj)); //Calculating the size of json object
         var sizeInKB = size / 1024; //Calculating the size in KB
-
-        //Size of the storage
-        var stats = fs.statSync(this.path);
-        var fileSize = stats.size;
-        var fileSizeInGB = fileSize / (1024 * 1024 * 1024);
 
         //Checking File Existence
         if (!fs.existsSync(this.path)) {
             this.createFile(this.path);
         }
 
+        //Size of the storage file
+        var stats = fs.statSync(this.path);
+        var fileSize = stats.size;
+        var fileSizeInGB = fileSize / (1024 * 1024 * 1024);
+
         // Error Handling
+
+        //Key is capped under 32 chars
         if (key.length > 32) {
             console.log("Key is greater than 32 character long.");
-        } else if (sizeInKB > 16) {
+        }
+
+        //Size of value JSON Object under 16KB
+        else if (sizeInKB > 16) {
             console.log("Size of json object exceeds 16KB");
-        } else if (fileSizeInGB == 1) {
+        }
+
+        //Size of the storage file never exceeds 1GB
+        else if (fileSizeInGB == 1) {
             console.log("Size of Storage exceeds 1 GB");
-        } else if (this.checkJSON(this.key)) {
+        }
+
+        //Existence of key using checkJSON method
+        else if (this.checkJSON(this.key)) {
             console.log("Key already Exist in local Storage");
-        } else {
-            console.log(this.path);
+        }
+
+        //Creating/Pushing JSON Object
+        else {
             this.setItem(this.key, this.value, this.time_to_live);
             console.log(
                 "Success! Key: " +
@@ -176,15 +212,20 @@ var dataStore = class dataStore {
      * @param {string} key - To read key-value pair of specific key
      */
     read(key) {
+        //Check the existence of key using checkJSON method
         if (!this.checkJSON(key)) {
             console.log("Key Doesn't Exist in local Storage");
         } else {
+            //Checking time to live property using checkTime Method
             if (this.checkTime(key)) {
                 return "Time Expired to read the data";
-            } else {
+            }
+
+            //Returning the value Object
+            else {
                 var jsonobj = this.getItem(key);
                 this.valueobj = jsonobj[key];
-                return this.valueobj;
+                return this.valueobj["Salary"];
             }
         }
     }
@@ -196,18 +237,28 @@ var dataStore = class dataStore {
      */
     delete(key) {
         //Error Handling
+
+        //Check Existence of key using checkJSON method
         if (!this.checkJSON(key)) {
             console.log("Key Doesn't exist in local storage");
         } else {
+            //Check time to live property using checkTime method
             if (this.checkTime(key)) {
                 console.log("Time Expired to delete the data");
-            } else {
-                var deleted_value = this.getItem(key);
+            }
+
+            //deleting the JSON object from storage using removeItem method
+            else {
+                var valueobj = this.getItem(key);
                 var removedObj = this.removeItem(key);
                 let data = JSON.stringify(removedObj, null, 2);
                 fs.writeFileSync(this.path, data);
                 console.log(
-                    "Success! Key: " + key + ", value: " + deleted_value + " is deleted",
+                    "Success! Key: " +
+                    key +
+                    ", value: " +
+                    valueobj[key]["Salary"] +
+                    " is deleted",
                 );
             }
         }

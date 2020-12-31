@@ -1,23 +1,70 @@
-DataStore :
+# <center>**DATASTORE**</center>
 
-This is a file which can be exposed as a library that supports the basic CRD(create, read, write) operations. Data store is meant to local storage for one single process on single laptop
+### <center>**Problem Statement:**</center>
 
-The data store will support the following :
+This is a file which can be exposed as a library that supports the basic CRD(create, read, write) operations. Data store is meant to local storage for one single process on single laptop. The datastore is exposed as a library to clients that can instantiate a class and work with the datastore.
 
-1. It can be initialized using an optional file path. If one is not provided, it will reliably
-   create itself in a reasonable location on the laptop.
-2. A new key-value pair can be added to the data store using the Create operation. The key
-   is always a string - capped at 32chars. The value is always a JSON object - capped at
-   16KB.
-3. If Create is invoked for an existing key, an appropriate error must be returned.
-4. A Read operation on a key can be performed by providing the key, and receiving the
-   value in response, as a JSON object.
-5. A Delete operation can be performed by providing the key.
-6. Every key supports setting a Time-To-Live property when it is created. This property is
-   optional. If provided, it will be evaluated as an integer defining the number of seconds
-   the key must be retained in the data store. Once the Time-To-Live for a key has expired,
-   the key will no longer be available for Read or Delete operations.
-7. Appropriate error responses must always be returned to a client if it uses the data store in
-   unexpected ways or breaches any limits
-8. The file size never exceeds 1GB
-9. The file is accessed by multi-threading
+### <center>**Getting Started**</center>
+
+To get started with this library, run the npm installer to get all the system requirements and to run the program without any error.<br>
+Run the following command: <br>
+
+```Javascript
+npm install
+```
+
+After running this command in command shell a node_modules folder will be created which will make run the program without error and in node environment.
+
+### <center>**File Structure:**</center>
+
+As this is a file which is exposed as library so the file structure is kept very simple.
+
+1. **datastore.js** : This is the main file which will be exposed as library. It has the class which the client can instantiate and all the methods to be used.
+2. **example.js** : This is the file where everything is implemented and demonstrate how the library can be used.
+3. **package.json and package-lock.json** : Setting files for node js
+
+### <center>**How to run datastore.js:**</center>
+
+Whole implementation of datastore.js is demonstrated in example.js. This is a breif summary of running the file as library.
+
+### Examples:
+
+1. ### **Initialising class in your example.js**
+
+```javascript
+//Importing our datastore file as library
+const dataStore = require("./datastore");
+
+//Instantiating the datastore class in our library by creating object for it.
+const store = new dataStore();
+```
+
+2. ### **Creating Initial Key Value Pair**
+
+```javascript
+store.create("Yatendra", 30000, 60); //Valid Callback
+store.create("Pratik", 15000, 30); //Valid Callback
+store.create("this sentence is more than 32 chars", 0, 0); //It wont create as the key is not capped under 32 char
+store.create("Yatendra", 30000, 60); //Invalid Callback as Yatendra key already exists
+```
+
+3. ### **Reading existing Key Value Pair**
+
+```javascript
+console.log(store.read("Yatendra")); //Valid Callback if called before time to live property
+console.log(store.read("Pratik")); //Valid Callback if called before time to live property
+console.log(store.read("Not Key")); //Invalid as such key doesnt exist
+```
+
+4. ### **Deleting Existing key value pair**
+
+```javascript
+store.delete("Pratik"); //Valid Callback if called before time to live property
+store.delete("Not Key"); //Invalid as such key doesnt exist
+```
+
+5. ### **Running Example.js and use datastore.js** <br> After writing all your code in your example.js file, open the command prompt and run -
+
+```javascript
+node example.js
+```
